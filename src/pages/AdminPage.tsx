@@ -349,7 +349,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-slate-600 font-semibold">
-                        ${trek.price}
+                        ₹{trek.price}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">

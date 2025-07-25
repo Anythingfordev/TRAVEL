@@ -46,6 +46,17 @@ function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'trek-details'>('home')
   const [selectedTrek, setSelectedTrek] = useState<Trek | null>(null)
 
+  // Refresh treks when navigating back to home page
+  useEffect(() => {
+    if (currentPage === 'home') {
+      // Small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        window.location.reload()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [currentPage])
+
   if (authLoading || treksLoading) {
     return <LoadingSpinner />
   }

@@ -378,7 +378,7 @@ export const TrekDetailsPage: React.FC<TrekDetailsPageProps> = ({ trek, onNaviga
             >
               <div className="text-center mb-6">
                 <div className="text-4xl font-bold text-slate-800 mb-2">
-                  ${trek.price}
+                  ₹{trek.price}
                   <span className="text-lg text-slate-500 font-normal"> /person</span>
                 </div>
                 <p className="text-slate-600">
