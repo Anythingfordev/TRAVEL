@@ -44,17 +44,23 @@ function App() {
   const { loading: authLoading, user, isAdminUser } = useAuth()
   const { treks, loading: treksLoading } = useTreks()
   const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'trek-details'>('home')
+  const [previousPage, setPreviousPage] = useState<'home' | 'admin' | 'trek-details'>('home')
   const [selectedTrek, setSelectedTrek] = useState<Trek | null>(null)
 
-  // Refresh treks when navigating back to home page
+  // Refresh treks when navigating back to home page from admin panel
   useEffect(() => {
-    if (currentPage === 'home') {
+    if (currentPage === 'home' && previousPage === 'admin') {
       // Small delay to ensure smooth transition
       const timer = setTimeout(() => {
         window.location.reload()
       }, 100)
       return () => clearTimeout(timer)
     }
+  }, [currentPage, previousPage])
+
+  // Track page changes
+  useEffect(() => {
+    setPreviousPage(currentPage)
   }, [currentPage])
 
   if (authLoading || treksLoading) {
@@ -87,6 +93,7 @@ function App() {
 
   const handleViewTrekDetails = (trek: Trek) => {
     setSelectedTrek(trek)
+    setPreviousPage(currentPage)
     setCurrentPage('trek-details')
   }
 
