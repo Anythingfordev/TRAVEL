@@ -269,7 +269,7 @@ export const TrekForm: React.FC<TrekFormProps> = ({ trek, onSubmit, onClose, isL
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Price (USD) *
+                Price (Rs) *
               </label>
               <input
                 type="number"

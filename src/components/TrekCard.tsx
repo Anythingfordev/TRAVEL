@@ -139,7 +139,7 @@ export const TrekCard: React.FC<TrekCardProps> = ({ trek, index, onViewDetails }
             }}
           >
             <div className="flex items-center space-x-1">
-              <DollarSign className="h-3 w-3 text-emerald-600" />
+              <span className="text-xs font-bold text-emerald-600">₹</span>
               <span className="text-sm font-bold text-slate-800">{trek.price}</span>
             </div>
           </motion.div>

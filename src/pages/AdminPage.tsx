@@ -227,7 +227,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 <DollarSign className="h-8 w-8 text-purple-600" />
               </div>
               <div>
-                <p className="text-3xl font-bold text-purple-800">${totalRevenue.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-purple-800">₹{totalRevenue.toLocaleString()}</p>
                 <p className="text-purple-600 font-medium">Total Revenue</p>
               </div>
             </div>
@@ -242,7 +242,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
                 <TrendingUp className="h-8 w-8 text-orange-600" />
               </div>
               <div>
-                <p className="text-3xl font-bold text-orange-800">${Math.round(avgPrice)}</p>
+                <p className="text-3xl font-bold text-orange-800">₹{Math.round(avgPrice)}</p>
                 <p className="text-orange-600 font-medium">Avg. Price</p>
               </div>
             </div>
