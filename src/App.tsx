@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Mountain, Route, Tag, ArrowLeft } from 'lucide-react'
+import { supabase } from './lib/supabase'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { TrekCard } from './components/TrekCard'
@@ -164,7 +165,7 @@ function App() {
       <Hero />
       
       <main className="container mx-auto px-4 py-16 relative z-10">
-        {/* Categories Section */}
+        {/* Weekend Trips Section */}
         {categories.filter(cat => cat.is_active).length > 0 && (
           <motion.section
             initial={{ opacity: 0 }}
@@ -173,6 +174,26 @@ function App() {
             transition={{ duration: 0.8 }}
             className="mb-16"
           >
+            <div className="text-center mb-12">
+              <motion.h2
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="text-4xl font-bold text-slate-800 mb-4"
+              >
+                Explore by Categories
+              </motion.h2>
+              <motion.p
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="text-xl text-slate-600 max-w-2xl mx-auto"
+              >
+                Discover amazing adventures organized by your interests
+              </motion.p>
+            </div>
             
             {categoriesLoading ? (
               <div className="flex justify-center">
@@ -192,61 +213,17 @@ function App() {
                 <p className="text-gray-500">Categories will appear here once they are created and activated.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="space-y-16">
                 {categories.filter(cat => cat.is_active).map((category) => (
-                  <motion.div
+                  <CategorySection
                     key={category.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -5 }}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
-                    onClick={() => handleViewCategory(category.id)}
-                  >
-                    <div className="p-6">
-                      <div className="flex items-center mb-4">
-                        <Tag className="w-6 h-6 text-blue-600 mr-3" />
-                        <h3 className="text-xl font-semibold text-gray-900">{category.title}</h3>
-                      </div>
-                      <p className="text-gray-600 mb-4">{category.description}</p>
-                      <div className="flex items-center text-blue-600">
-                      </div>
-                    </div>
-                  </motion.div>
+                    category={category}
+                    onViewCategory={handleViewCategory}
+                    onViewTrekDetails={handleViewTrekDetails}
+                  />
                 ))}
               </div>
             )}
-            
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, staggerChildren: 0.1 }}
-            >
-              {categories.filter(cat => cat.is_active).map((category, index) => (
-                <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  className="bg-white rounded-xl shadow-lg p-6 border border-slate-100 hover:shadow-xl transition-all duration-300 cursor-pointer"
-                  onClick={() => handleViewCategory(category.id)}
-                >
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="p-3 bg-emerald-100 rounded-xl">
-                      <Tag className="h-6 w-6 text-emerald-600" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800">{category.title}</h3>
-                  </div>
-                  <p className="text-slate-600 leading-relaxed">{category.description}</p>
-                  <div className="mt-4 flex items-center text-emerald-600 font-medium">
-                    <span>Explore {category.title}</span>
-                    <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
           </motion.section>
         )}
 
@@ -321,6 +298,101 @@ function App() {
         </div>
       </motion.footer>
     </div>
+  )
+}
+
+// Category Section Component
+const CategorySection: React.FC<{
+  category: any
+  onViewCategory: (categoryId: string) => void
+  onViewTrekDetails: (trek: Trek) => void
+}> = ({ category, onViewCategory, onViewTrekDetails }) => {
+  const [categoryTreks, setCategoryTreks] = useState<Trek[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCategoryTreks = async () => {
+      try {
+        if (!supabase) {
+          setLoading(false)
+          return
+        }
+
+        const { data, error } = await supabase
+          .from('treks')
+          .select(`
+            *,
+            trek_categories!inner(category_id)
+          `)
+          .eq('trek_categories.category_id', category.id)
+          .order('start_date', { ascending: true })
+          .limit(3)
+
+        if (error) throw error
+        setCategoryTreks(data || [])
+      } catch (err) {
+        console.error('Error fetching category treks:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCategoryTreks()
+  }, [category.id])
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+      </div>
+    )
+  }
+
+  if (categoryTreks.length === 0) {
+    return null // Don't show empty categories
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100"
+    >
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-4">
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <Tag className="h-8 w-8 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-3xl font-bold text-slate-800">{category.title}</h3>
+            <p className="text-slate-600 mt-1">{category.description}</p>
+          </div>
+        </div>
+        
+        <motion.button
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onViewCategory(category.id)}
+          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+        >
+          <span>View All</span>
+          <ArrowLeft className="h-4 w-4 rotate-180" />
+        </motion.button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {categoryTreks.map((trek, index) => (
+          <TrekCard
+            key={trek.id}
+            trek={trek}
+            index={index}
+            onViewDetails={() => onViewTrekDetails(trek)}
+          />
+        ))}
+      </div>
+    </motion.div>
   )
 }
 
