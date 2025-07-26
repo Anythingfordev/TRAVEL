@@ -309,15 +309,18 @@ const CategorySection: React.FC<{
 }> = ({ category, onViewCategory, onViewTrekDetails }) => {
   const [categoryTreks, setCategoryTreks] = useState<Trek[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCategoryTreks = async () => {
+      if (!category.id || !supabase) {
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
-        if (!supabase) {
-          setLoading(false)
-          return
-        }
+        setError(null)
 
         const { data, error } = await supabase
           .from('treks')
@@ -329,38 +332,108 @@ const CategorySection: React.FC<{
           .order('start_date', { ascending: true })
           .limit(3)
 
-        if (error) throw error
-        setCategoryTreks(data || [])
+        if (error) {
+          console.error('Error fetching category treks:', error)
+          setError(error.message)
+          setCategoryTreks([])
+        } else {
+          setCategoryTreks(data || [])
+        }
       } catch (err) {
         console.error('Error fetching category treks:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load treks')
         setCategoryTreks([])
       } finally {
         setLoading(false)
       }
     }
 
-    if (category.id) {
-      fetchCategoryTreks()
-    }
+    fetchCategoryTreks()
   }, [category.id])
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100"
+      >
+        <div className="flex items-center space-x-4 mb-8">
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <Tag className="h-8 w-8 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-3xl font-bold text-slate-800">{category.title}</h3>
+            <p className="text-slate-600 mt-1">{category.description}</p>
+          </div>
+        </div>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading treks...</p>
+        </div>
+      </motion.div>
+    )
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100"
+      >
+        <div className="flex items-center space-x-4 mb-8">
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <Tag className="h-8 w-8 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-3xl font-bold text-slate-800">{category.title}</h3>
+            <p className="text-slate-600 mt-1">{category.description}</p>
+          </div>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-red-600">Error loading treks: {error}</p>
+        </div>
+      </motion.div>
     )
   }
 
   if (categoryTreks.length === 0) {
-    return null // Don't show empty categories
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100"
+      >
+        <div className="flex items-center space-x-4 mb-8">
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <Tag className="h-8 w-8 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-3xl font-bold text-slate-800">{category.title}</h3>
+            <p className="text-slate-600 mt-1">{category.description}</p>
+          </div>
+        </div>
+        <div className="text-center py-8">
+          <Tag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-slate-500">No treks available in this category yet.</p>
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onViewCategory(category.id)}
+            className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+          >
+            View Category
+          </motion.button>
+        </div>
+      </motion.div>
+    )
   }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100"
     >
