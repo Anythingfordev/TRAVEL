@@ -313,7 +313,13 @@ const CategorySection: React.FC<{
 
   useEffect(() => {
     const fetchCategoryTreks = async () => {
-      if (!category.id || !supabase) {
+      if (!category.id) {
+        setLoading(false)
+        return
+      }
+
+      if (!supabase) {
+        setError('Database connection not available. Please check your configuration.')
         setLoading(false)
         return
       }
