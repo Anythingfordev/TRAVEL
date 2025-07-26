@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Mountain, Route } from 'lucide-react'
+import { Mountain, Route, Tag, ArrowLeft } from 'lucide-react'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { TrekCard } from './components/TrekCard'
