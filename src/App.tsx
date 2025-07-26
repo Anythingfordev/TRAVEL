@@ -165,67 +165,6 @@ function App() {
       <Hero />
       
       <main className="container mx-auto px-4 py-16 relative z-10">
-        {/* Weekend Trips Section */}
-        {categories.filter(cat => cat.is_active).length > 0 && (
-          <motion.section
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="mb-16"
-          >
-            <div className="text-center mb-12">
-              <motion.h2
-                initial={{ y: 30, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="text-4xl font-bold text-slate-800 mb-4"
-              >
-                Explore by Categories
-              </motion.h2>
-              <motion.p
-                initial={{ y: 30, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-xl text-slate-600 max-w-2xl mx-auto"
-              >
-                Discover amazing adventures organized by your interests
-              </motion.p>
-            </div>
-            
-            {categoriesLoading ? (
-              <div className="flex justify-center">
-                <LoadingSpinner />
-              </div>
-            ) : categoriesError ? (
-              <div className="text-center py-12">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-                  <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Categories</h3>
-                  <p className="text-red-600 text-sm">{categoriesError}</p>
-                </div>
-              </div>
-            ) : categories.filter(cat => cat.is_active).length === 0 ? (
-              <div className="text-center py-12">
-                <Tag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Categories Available</h3>
-                <p className="text-gray-500">Categories will appear here once they are created and activated.</p>
-              </div>
-            ) : (
-              <div className="space-y-16">
-                {categories.filter(cat => cat.is_active).map((category) => (
-                  <CategorySection
-                    key={category.id}
-                    category={category}
-                    onViewCategory={handleViewCategory}
-                    onViewTrekDetails={handleViewTrekDetails}
-                  />
-                ))}
-              </div>
-            )}
-          </motion.section>
-        )}
 
         {!user && (
           <motion.section
