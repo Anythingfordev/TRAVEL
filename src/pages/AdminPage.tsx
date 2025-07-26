@@ -31,7 +31,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome, onNavigate
   const [editingTrek, setEditingTrek] = useState<Trek | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (data: Omit<Trek, 'id' | 'created_at' | 'created_by'>) => {
   const handleSubmit = async (data: Omit<Trek, 'id' | 'created_at' | 'created_by'>, categoryIds?: string[]) => {
     setIsLoading(true)
     try {
