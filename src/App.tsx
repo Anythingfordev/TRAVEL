@@ -5,10 +5,13 @@ import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { TrekCard } from './components/TrekCard'
 import { AdminPage } from './pages/AdminPage'
+import { ManageCategoriesPage } from './pages/ManageCategoriesPage'
+import { CategoryPage } from './pages/CategoryPage'
 import { TrekDetailsPage } from './pages/TrekDetailsPage'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { useAuth } from './hooks/useAuth'
 import { useTreks } from './hooks/useTreks'
+import { useCategories } from './hooks/useCategories'
 import { Trek } from './types'
 
 // Floating particles animation component
@@ -43,13 +46,15 @@ const FloatingParticles: React.FC = () => {
 function App() {
   const { loading: authLoading, user, isAdminUser } = useAuth()
   const { treks, loading: treksLoading } = useTreks()
-  const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'trek-details'>('home')
-  const [previousPage, setPreviousPage] = useState<'home' | 'admin' | 'trek-details'>('home')
+  const { categories, fetchActiveCategories } = useCategories()
+  const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'manage-categories' | 'category' | 'trek-details'>('home')
+  const [previousPage, setPreviousPage] = useState<'home' | 'admin' | 'manage-categories' | 'category' | 'trek-details'>('home')
   const [selectedTrek, setSelectedTrek] = useState<Trek | null>(null)
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
 
   // Refresh treks when navigating back to home page from admin panel
   useEffect(() => {
-    if (currentPage === 'home' && previousPage === 'admin') {
+    if (currentPage === 'home' && (previousPage === 'admin' || previousPage === 'manage-categories')) {
       // Small delay to ensure smooth transition
       const timer = setTimeout(() => {
         window.location.reload()
@@ -63,8 +68,33 @@ function App() {
     setPreviousPage(currentPage)
   }, [currentPage])
 
+  // Fetch active categories on mount
+  useEffect(() => {
+    fetchActiveCategories()
+  }, [fetchActiveCategories])
+
   if (authLoading || treksLoading) {
     return <LoadingSpinner />
+  }
+
+  if (currentPage === 'category' && selectedCategoryId) {
+    return (
+      <>
+        <FloatingParticles />
+        <CategoryPage 
+          categoryId={selectedCategoryId}
+          onNavigateBack={() => {
+            setCurrentPage('home')
+            setSelectedCategoryId(null)
+          }}
+          onViewTrekDetails={(trek) => {
+            setSelectedTrek(trek)
+            setPreviousPage('category')
+            setCurrentPage('trek-details')
+          }}
+        />
+      </>
+    )
   }
 
   if (currentPage === 'trek-details' && selectedTrek) {
@@ -74,10 +104,19 @@ function App() {
       <TrekDetailsPage 
         trek={selectedTrek} 
         onNavigateBack={() => {
-          setCurrentPage('home')
+          setCurrentPage(previousPage === 'category' ? 'category' : 'home')
           setSelectedTrek(null)
         }}
       />
+      </>
+    )
+  }
+
+  if (currentPage === 'manage-categories' && user && isAdminUser) {
+    return (
+      <>
+        <FloatingParticles />
+        <ManageCategoriesPage onNavigateBack={() => setCurrentPage('admin')} />
       </>
     )
   }
@@ -86,7 +125,10 @@ function App() {
     return (
       <>
         <FloatingParticles />
-        <AdminPage onNavigateHome={() => setCurrentPage('home')} />
+        <AdminPage 
+          onNavigateHome={() => setCurrentPage('home')}
+          onNavigateToCategories={() => setCurrentPage('manage-categories')}
+        />
       </>
     )
   }
@@ -95,6 +137,12 @@ function App() {
     setSelectedTrek(trek)
     setPreviousPage(currentPage)
     setCurrentPage('trek-details')
+  }
+
+  const handleViewCategory = (categoryId: string) => {
+    setSelectedCategoryId(categoryId)
+    setPreviousPage(currentPage)
+    setCurrentPage('category')
   }
 
   return (
@@ -127,6 +175,70 @@ function App() {
       <Hero />
       
       <main className="container mx-auto px-4 py-16 relative z-10">
+        {/* Categories Section */}
+        {categories.filter(cat => cat.is_active).length > 0 && (
+          <motion.section
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-16"
+          >
+            <div className="text-center mb-12">
+              <motion.h2
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="text-4xl font-bold text-slate-800 mb-4"
+              >
+                Explore by Category
+              </motion.h2>
+              <motion.p
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="text-xl text-slate-600 max-w-2xl mx-auto"
+              >
+                Discover adventures tailored to your interests and experience level
+              </motion.p>
+            </div>
+            
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, staggerChildren: 0.1 }}
+            >
+              {categories.filter(cat => cat.is_active).map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  className="bg-white rounded-xl shadow-lg p-6 border border-slate-100 hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  onClick={() => handleViewCategory(category.id)}
+                >
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="p-3 bg-emerald-100 rounded-xl">
+                      <Tag className="h-6 w-6 text-emerald-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">{category.title}</h3>
+                  </div>
+                  <p className="text-slate-600 leading-relaxed">{category.description}</p>
+                  <div className="mt-4 flex items-center text-emerald-600 font-medium">
+                    <span>Explore {category.title}</span>
+                    <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.section>
+        )}
+
         <motion.section
           id="treks"
           initial={{ opacity: 0 }}

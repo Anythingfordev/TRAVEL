@@ -3,11 +3,12 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { X, Plus, Trash2, Clock } from 'lucide-react'
 import { Trek, ItineraryDay, ItineraryActivity } from '../types'
+import { useCategories } from '../hooks/useCategories'
 import { useState } from 'react'
 
 interface TrekFormProps {
   trek?: Trek
-  onSubmit: (data: Omit<Trek, 'id' | 'created_at' | 'created_by'>) => Promise<void>
+  onSubmit: (data: Omit<Trek, 'id' | 'created_at' | 'created_by'>, categoryIds?: string[]) => Promise<void>
   onClose: () => void
   isLoading: boolean
 }
@@ -19,6 +20,9 @@ export const TrekForm: React.FC<TrekFormProps> = ({ trek, onSubmit, onClose, isL
   const [exclusions, setExclusions] = useState<string[]>(trek?.exclusions || [''])
   const [thingsToCarry, setThingsToCarry] = useState<string[]>(trek?.things_to_carry || [''])
   const [itinerary, setItinerary] = useState<ItineraryDay[]>(trek?.itinerary || [])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  
+  const { categories } = useCategories()
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     defaultValues: trek ? {
@@ -143,6 +147,14 @@ export const TrekForm: React.FC<TrekFormProps> = ({ trek, onSubmit, onClose, isL
     setItinerary(updated)
   }
 
+  const handleCategoryChange = (categoryId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCategories(prev => [...prev, categoryId])
+    } else {
+      setSelectedCategories(prev => prev.filter(id => id !== categoryId))
+    }
+  }
+
   const handleFormSubmit = (data: FormData) => {
     const filteredInclusions = inclusions.filter(item => item && item.trim() !== '')
     const filteredExclusions = exclusions.filter(item => item && item.trim() !== '')
@@ -161,7 +173,8 @@ export const TrekForm: React.FC<TrekFormProps> = ({ trek, onSubmit, onClose, isL
     }
     
     console.log('Submitting trek data:', formattedData)
-    onSubmit(formattedData)
+    console.log('Selected categories:', selectedCategories)
+    onSubmit(formattedData, selectedCategories)
   }
 
   return (
@@ -348,6 +361,37 @@ export const TrekForm: React.FC<TrekFormProps> = ({ trek, onSubmit, onClose, isL
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               placeholder="https://example.com/image.jpg"
             />
+          </div>
+
+          {/* Categories */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3">
+              Categories
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {categories.map((category) => (
+                <div key={category.id} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`category-${category.id}`}
+                    checked={selectedCategories.includes(category.id)}
+                    onChange={(e) => handleCategoryChange(category.id, e.target.checked)}
+                    className="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2"
+                  />
+                  <label 
+                    htmlFor={`category-${category.id}`}
+                    className="text-sm text-slate-700 cursor-pointer"
+                  >
+                    {category.title}
+                  </label>
+                </div>
+              ))}
+            </div>
+            {categories.length === 0 && (
+              <p className="text-sm text-slate-500 italic">
+                No categories available. Create categories first in the admin panel.
+              </p>
+            )}
           </div>
 
           {/* Inclusions */}

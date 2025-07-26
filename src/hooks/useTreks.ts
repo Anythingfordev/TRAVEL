@@ -34,7 +34,7 @@ export const useTreks = () => {
     }
   }
 
-  const addTrek = async (trek: Omit<Trek, 'id' | 'created_at'>) => {
+  const addTrek = async (trek: Omit<Trek, 'id' | 'created_at'>, categoryIds?: string[]) => {
     try {
       if (!supabase) {
         return { success: false, error: 'Supabase client not configured. Cannot add trek.' }
@@ -56,6 +56,23 @@ export const useTreks = () => {
         .single()
 
       if (error) throw error
+      
+      // Add trek to categories if provided
+      if (categoryIds && categoryIds.length > 0) {
+        const categoryInserts = categoryIds.map(categoryId => ({
+          trek_id: data.id,
+          category_id: categoryId
+        }))
+        
+        const { error: categoryError } = await supabase
+          .from('trek_categories')
+          .insert(categoryInserts)
+        
+        if (categoryError) {
+          console.error('Error adding trek to categories:', categoryError)
+        }
+      }
+      
       setTreks((prev: Trek[]) => [...prev, data])
       return { success: true, data }
     } catch (err) {
@@ -64,7 +81,7 @@ export const useTreks = () => {
     }
   }
 
-  const updateTrek = async (id: string, updates: Partial<Trek>) => {
+  const updateTrek = async (id: string, updates: Partial<Trek>, categoryIds?: string[]) => {
     try {
       if (!supabase) {
         return { success: false, error: 'Supabase client not configured. Cannot update trek.' }
@@ -92,6 +109,31 @@ export const useTreks = () => {
       if (error) {
         console.error('Supabase update error:', error)
         throw error
+      }
+      
+      // Update trek categories if provided
+      if (categoryIds !== undefined) {
+        // First, remove existing categories
+        await supabase
+          .from('trek_categories')
+          .delete()
+          .eq('trek_id', id)
+        
+        // Then add new categories
+        if (categoryIds.length > 0) {
+          const categoryInserts = categoryIds.map(categoryId => ({
+            trek_id: id,
+            category_id: categoryId
+          }))
+          
+          const { error: categoryError } = await supabase
+            .from('trek_categories')
+            .insert(categoryInserts)
+          
+          if (categoryError) {
+            console.error('Error updating trek categories:', categoryError)
+          }
+        }
       }
       
       console.log('Update successful:', data)
@@ -123,6 +165,37 @@ export const useTreks = () => {
     }
   }
 
+  const fetchTreksByCategory = async (categoryId: string) => {
+    try {
+      if (!supabase) {
+        setError('Supabase client is not initialized. Cannot fetch treks.')
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+      const { data, error } = await supabase
+        .from('treks')
+        .select(`
+          *,
+          trek_categories!inner(category_id)
+        `)
+        .eq('trek_categories.category_id', categoryId)
+        .order('start_date', { ascending: true })
+
+      if (error) {
+        throw error
+      }
+      setTreks(data || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('Error fetching treks by category:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchTreks()
   }, [])
@@ -134,6 +207,7 @@ export const useTreks = () => {
     addTrek,
     updateTrek,
     deleteTrek,
-    refetch: fetchTreks
+    refetch: fetchTreks,
+    fetchTreksByCategory
   }
 }

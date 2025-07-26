@@ -11,7 +11,8 @@ import {
   Calendar,
   DollarSign,
   Activity,
-  Mountain
+  Mountain,
+  Tag
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useTreks } from '../hooks/useTreks'
@@ -20,9 +21,10 @@ import { Trek } from '../types'
 
 interface AdminPageProps {
   onNavigateHome: () => void
+  onNavigateToCategories: () => void
 }
 
-export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
+export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome, onNavigateToCategories }) => {
   const { user } = useAuth()
   const { treks, addTrek, updateTrek, deleteTrek } = useTreks()
   const [showForm, setShowForm] = useState(false)
@@ -30,11 +32,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (data: Omit<Trek, 'id' | 'created_at' | 'created_by'>) => {
+  const handleSubmit = async (data: Omit<Trek, 'id' | 'created_at' | 'created_by'>, categoryIds?: string[]) => {
     setIsLoading(true)
     try {
       if (editingTrek) {
         console.log('Updating trek:', editingTrek.id, data)
-        const result = await updateTrek(editingTrek.id, data)
+        const result = await updateTrek(editingTrek.id, data, categoryIds)
         if (!result.success) {
           console.error('Update failed:', result.error)
           alert('Failed to update trek: ' + result.error)
@@ -42,7 +45,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
         }
       } else {
         console.log('Adding new trek:', data)
-        const result = await addTrek({ ...data, created_by: user?.id })
+        const result = await addTrek({ ...data, created_by: user?.id }, categoryIds)
         if (!result.success) {
           console.error('Add failed:', result.error)
           alert('Failed to add trek: ' + result.error)
@@ -247,6 +250,25 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onNavigateHome }) => {
               </div>
             </div>
           </motion.div>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-white rounded-xl shadow-lg border border-slate-100 p-6 mb-8"
+        >
+          <h3 className="text-xl font-bold text-slate-800 mb-4">Quick Actions</h3>
+          <div className="flex flex-wrap gap-4">
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onNavigateToCategories}
+              className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              <Tag className="h-5 w-5" />
+              <span>Manage Categories</span>
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Treks Table */}

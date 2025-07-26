@@ -37,3 +37,19 @@ export interface User {
   name: string
   avatar_url?: string
 }
+
+export interface Category {
+  id: string
+  title: string
+  description: string
+  is_active: boolean
+  created_at: string
+  created_by: string
+}
+
+export interface TrekCategory {
+  id: string
+  trek_id: string
+  category_id: string
+  created_at: string
+}
