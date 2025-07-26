@@ -101,13 +101,13 @@ function App() {
     return (
       <>
         <FloatingParticles />
-      <TrekDetailsPage 
-        trek={selectedTrek} 
-        onNavigateBack={() => {
-          setCurrentPage(previousPage === 'category' ? 'category' : 'home')
-          setSelectedTrek(null)
-        }}
-      />
+        <TrekDetailsPage 
+          trek={selectedTrek} 
+          onNavigateBack={() => {
+            setCurrentPage(previousPage === 'category' ? 'category' : 'home')
+            setSelectedTrek(null)
+          }}
+        />
       </>
     )
   }
@@ -220,6 +220,8 @@ function App() {
                       </div>
                       <p className="text-gray-600 mb-4">{category.description}</p>
                       <div className="flex items-center text-blue-600">
+                      </div>
+                    </div>
                   </motion.div>
                 ))}
               </div>
