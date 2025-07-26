@@ -9,7 +9,7 @@ import {
   Eye,
   EyeOff,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
   MapPin,
   ChevronDown,
   ChevronRight
