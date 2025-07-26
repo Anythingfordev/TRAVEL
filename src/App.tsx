@@ -313,6 +313,7 @@ const CategorySection: React.FC<{
   useEffect(() => {
     const fetchCategoryTreks = async () => {
       try {
+        setLoading(true)
         if (!supabase) {
           setLoading(false)
           return
@@ -332,12 +333,15 @@ const CategorySection: React.FC<{
         setCategoryTreks(data || [])
       } catch (err) {
         console.error('Error fetching category treks:', err)
+        setCategoryTreks([])
       } finally {
         setLoading(false)
       }
     }
 
-    fetchCategoryTreks()
+    if (category.id) {
+      fetchCategoryTreks()
+    }
   }, [category.id])
 
   if (loading) {
