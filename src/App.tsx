@@ -46,7 +46,7 @@ const FloatingParticles: React.FC = () => {
 function App() {
   const { loading: authLoading, user, isAdminUser } = useAuth()
   const { treks, loading: treksLoading } = useTreks()
-  const { categories, fetchActiveCategories } = useCategories()
+  const { categories, loading: categoriesLoading, error: categoriesError, fetchActiveCategories } = useCategories()
   const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'manage-categories' | 'category' | 'trek-details'>('home')
   const [previousPage, setPreviousPage] = useState<'home' | 'admin' | 'manage-categories' | 'category' | 'trek-details'>('home')
   const [selectedTrek, setSelectedTrek] = useState<Trek | null>(null)
@@ -196,7 +196,7 @@ function App() {
                   <p className="text-red-600 text-sm">{categoriesError}</p>
                 </div>
               </div>
-            ) : activeCategories.length === 0 ? (
+            ) : categories.filter(cat => cat.is_active).length === 0 ? (
               <div className="text-center py-12">
                 <Tag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">No Categories Available</h3>
@@ -204,14 +204,14 @@ function App() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {activeCategories.map((category) => (
+                {categories.filter(cat => cat.is_active).map((category) => (
                   <motion.div
                     key={category.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     whileHover={{ y: -5 }}
                     className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
-                    onClick={() => navigate(`/category/${category.id}`)}
+                    onClick={() => handleViewCategory(category.id)}
                   >
                     <div className="p-6">
                       <div className="flex items-center mb-4">
