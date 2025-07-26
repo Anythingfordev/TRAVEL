@@ -10,7 +10,7 @@ export const useCategories = () => {
   const fetchCategories = async () => {
     try {
       if (!supabase) {
-        setError('Supabase client is not initialized. Cannot fetch categories.')
+        setError('Database connection not configured. Please set up Supabase credentials.')
         setLoading(false)
         return
       }
@@ -27,7 +27,8 @@ export const useCategories = () => {
       }
       setCategories(data || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      setError(`Failed to load categories: ${errorMessage}`)
       console.error('Error fetching categories:', err)
     } finally {
       setLoading(false)
@@ -37,7 +38,7 @@ export const useCategories = () => {
   const fetchActiveCategories = async () => {
     try {
       if (!supabase) {
-        setError('Supabase client is not initialized. Cannot fetch categories.')
+        setError('Database connection not configured. Please set up Supabase credentials.')
         setLoading(false)
         return
       }
@@ -55,7 +56,8 @@ export const useCategories = () => {
       }
       setCategories(data || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      setError(`Failed to load categories: ${errorMessage}`)
       console.error('Error fetching active categories:', err)
     } finally {
       setLoading(false)

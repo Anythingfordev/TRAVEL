@@ -184,26 +184,46 @@ function App() {
             transition={{ duration: 0.8 }}
             className="mb-16"
           >
-            <div className="text-center mb-12">
-              <motion.h2
-                initial={{ y: 30, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="text-4xl font-bold text-slate-800 mb-4"
-              >
-                Explore by Category
-              </motion.h2>
-              <motion.p
-                initial={{ y: 30, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-xl text-slate-600 max-w-2xl mx-auto"
-              >
-                Discover adventures tailored to your interests and experience level
-              </motion.p>
-            </div>
+            
+            {categoriesLoading ? (
+              <div className="flex justify-center">
+                <LoadingSpinner />
+              </div>
+            ) : categoriesError ? (
+              <div className="text-center py-12">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Categories</h3>
+                  <p className="text-red-600 text-sm">{categoriesError}</p>
+                </div>
+              </div>
+            ) : activeCategories.length === 0 ? (
+              <div className="text-center py-12">
+                <Tag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Categories Available</h3>
+                <p className="text-gray-500">Categories will appear here once they are created and activated.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {activeCategories.map((category) => (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ y: -5 }}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer"
+                    onClick={() => navigate(`/category/${category.id}`)}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-center mb-4">
+                        <Tag className="w-6 h-6 text-blue-600 mr-3" />
+                        <h3 className="text-xl font-semibold text-gray-900">{category.title}</h3>
+                      </div>
+                      <p className="text-gray-600 mb-4">{category.description}</p>
+                      <div className="flex items-center text-blue-600">
+                  </motion.div>
+                ))}
+              </div>
+            )}
             
             <motion.div 
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
