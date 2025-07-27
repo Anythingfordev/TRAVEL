@@ -138,7 +138,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               transition={{ duration: 0.6 }}
               className="text-4xl font-bold text-slate-800 mb-4"
             >
-              {category.title} Treks
+              All {category.title} Treks
             </motion.h2>
             <motion.p
               initial={{ y: 30, opacity: 0 }}
@@ -147,8 +147,24 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-xl text-slate-600 max-w-2xl mx-auto"
             >
-              Discover amazing adventures in the {category.title.toLowerCase()} category
+              Explore all available treks in the {category.title.toLowerCase()} category
             </motion.p>
+            
+            {/* Trek count indicator */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="mt-4"
+            >
+              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full">
+                <MapPin className="h-4 w-4" />
+                <span className="font-medium">
+                  {treksLoading ? 'Loading...' : `${treks.length} trek${treks.length !== 1 ? 's' : ''} available`}
+                </span>
+              </div>
+            </motion.div>
           </div>
           
           {treksLoading ? (

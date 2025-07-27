@@ -65,6 +65,36 @@ export const useCategories = () => {
     }
   }
 
+  const fetchAllCategories = async () => {
+    try {
+      if (!supabase) {
+        setError('Database connection not configured. Please set up Supabase credentials.')
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+      
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('is_active', { ascending: false })
+        .order('title', { ascending: true })
+
+      if (error) {
+        throw error
+      }
+      setCategories(data || [])
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      setError(`Failed to load categories: ${errorMessage}`)
+      console.error('Error fetching all categories:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const addCategory = async (category: Omit<Category, 'id' | 'created_at'>) => {
     try {
       if (!supabase) {
@@ -149,6 +179,7 @@ export const useCategories = () => {
     deleteCategory,
     toggleCategoryStatus,
     refetch: fetchCategories,
-    fetchActiveCategories
+    fetchActiveCategories,
+    fetchAllCategories
   }
 }
