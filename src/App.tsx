@@ -26,14 +26,14 @@ function App() {
 
   // Load appropriate categories based on user role
   React.useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && categories.length === 0) {
       if (isAdminUser) {
         fetchAllCategories()
       } else {
         fetchActiveCategories()
       }
     }
-  }, [isAdminUser, authLoading])
+  }, [isAdminUser, authLoading, categories.length, fetchActiveCategories, fetchAllCategories])
 
   const handleAdminToggle = () => {
     setCurrentPage(currentPage === 'admin' ? 'home' : 'admin')

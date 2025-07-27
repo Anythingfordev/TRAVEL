@@ -197,10 +197,7 @@ export const useTreks = () => {
   }
 
   useEffect(() => {
-    // Only fetch on initial mount
-    if (treks.length === 0 && !loading && !error) {
-      fetchTreks()
-    }
+    fetchTreks()
   }, [])
 
   return {
