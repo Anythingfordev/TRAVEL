@@ -26,12 +26,14 @@ function App() {
 
   // Load appropriate categories based on user role
   React.useEffect(() => {
-    if (isAdminUser) {
-      fetchAllCategories()
-    } else {
-      fetchActiveCategories()
+    if (!authLoading) {
+      if (isAdminUser) {
+        fetchAllCategories()
+      } else {
+        fetchActiveCategories()
+      }
     }
-  }, [isAdminUser, fetchActiveCategories, fetchAllCategories])
+  }, [isAdminUser, authLoading])
 
   const handleAdminToggle = () => {
     setCurrentPage(currentPage === 'admin' ? 'home' : 'admin')
@@ -74,14 +76,12 @@ function App() {
   }
 
   // Get treks for a specific category (limited to 3 for home page)
-  const getTreksForCategory = (categoryId: string, limit?: number) => {
-    const categoryTreks = treks.filter(trek => {
-      // For now, we'll show all treks since we don't have category relationships loaded
-      // In a real implementation, you'd filter by trek-category relationships
-      return true
-    })
+  const getTreksForCategory = React.useCallback((categoryId: string, limit?: number) => {
+    // For now, we'll show all treks since we don't have category relationships loaded
+    // In a real implementation, you'd filter by trek-category relationships
+    const categoryTreks = treks
     return limit ? categoryTreks.slice(0, limit) : categoryTreks
-  }
+  }, [treks])
 
   if (authLoading) {
     return <LoadingSpinner />

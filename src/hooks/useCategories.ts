@@ -167,7 +167,7 @@ export const useCategories = () => {
   }
 
   useEffect(() => {
-    fetchCategories()
+    // Only fetch on mount, not on every render
   }, [])
 
   return {
