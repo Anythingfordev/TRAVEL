@@ -6,6 +6,16 @@ import { useCategories } from './hooks/useCategories'
 import { TrekCard } from './components/TrekCard'
 import { Category, Trek } from './types'
 
+function App() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50">
+      <p>App component placeholder</p>
+    </div>
+  )
+}
+
+export default App
+
 interface CategoryPageProps {
   categoryId: string
   onNavigateBack: () => void
