@@ -18,7 +18,7 @@ type Page = 'home' | 'admin' | 'categories' | 'category' | 'trek-details'
 
 function App() {
   const { user, loading: authLoading, isAdminUser } = useAuth()
-  const { treks, loading: treksLoading, getTreksForCategory } = useTreks()
+  const { treks, loading: treksLoading, getTreksForCategory, treksByCategory } = useTreks()
   const { categories, loading: categoriesLoading, fetchActiveCategories, fetchAllCategories } = useCategories()
   const [currentPage, setCurrentPage] = useState<Page>('home')
   const [selectedTrek, setSelectedTrek] = useState<Trek | null>(null)
