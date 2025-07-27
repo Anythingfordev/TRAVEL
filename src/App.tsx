@@ -200,6 +200,18 @@ function App() {
                           <ArrowRight className="h-4 w-4" />
                         </motion.button>
                       )}
+                      
+                      {getTotalTreksForCategory(category.id) > 3 && (
+                        <motion.button
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleNavigateToCategory(category.id)}
+                          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+                        >
+                          <span>View All ({getTotalTreksForCategory(category.id)})</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </motion.button>
+                      )}
                     </div>
 
                     {treksLoading || categoriesLoading ? (
@@ -226,7 +238,7 @@ function App() {
                     )}
                     
                     {/* Show "View All" link at bottom if there are more than 3 treks */}
-                    {getTotalTreksForCategory(category.id) > 3 && categoryTreks.length === 3 && (
+                    {getTotalTreksForCategory(category.id) > 3 && (
                       <div className="text-center mt-6">
                         <motion.button
                           whileHover={{ scale: 1.02 }}
@@ -234,7 +246,7 @@ function App() {
                           onClick={() => handleNavigateToCategory(category.id)}
                           className="text-emerald-600 hover:text-emerald-700 font-medium text-lg flex items-center justify-center space-x-2 mx-auto"
                         >
-                          <span>View {getTotalTreksForCategory(category.id) - 3} more treks in {category.title}</span>
+                          <span>View {getTotalTreksForCategory(category.id) - categoryTreks.length} more treks in {category.title}</span>
                           <ArrowRight className="h-4 w-4" />
                         </motion.button>
                       </div>
@@ -314,6 +326,18 @@ function App() {
                           <ArrowRight className="h-4 w-4" />
                         </motion.button>
                       )}
+                      
+                      {getTotalTreksForCategory(category.id) > 3 && (
+                        <motion.button
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleNavigateToCategory(category.id)}
+                          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
+                        >
+                          <span>Preview All ({getTotalTreksForCategory(category.id)})</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </motion.button>
+                      )}
                     </div>
 
                     {categoryTreks.length === 0 ? (
@@ -335,7 +359,7 @@ function App() {
                     )}
                     
                     {/* Show "View All" link at bottom for inactive categories too */}
-                    {getTotalTreksForCategory(category.id) > 3 && categoryTreks.length === 3 && (
+                    {getTotalTreksForCategory(category.id) > 3 && (
                       <div className="text-center mt-6">
                         <motion.button
                           whileHover={{ scale: 1.02 }}
@@ -343,7 +367,7 @@ function App() {
                           onClick={() => handleNavigateToCategory(category.id)}
                           className="text-amber-600 hover:text-amber-700 font-medium text-lg flex items-center justify-center space-x-2 mx-auto"
                         >
-                          <span>Preview {getTotalTreksForCategory(category.id) - 3} more treks</span>
+                          <span>Preview {getTotalTreksForCategory(category.id) - categoryTreks.length} more treks</span>
                           <ArrowRight className="h-4 w-4" />
                         </motion.button>
                       </div>
