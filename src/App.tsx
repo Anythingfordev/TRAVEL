@@ -18,7 +18,7 @@ type Page = 'home' | 'admin' | 'categories' | 'category' | 'trek-details'
 
 function App() {
   const { user, loading: authLoading, isAdminUser } = useAuth()
-  const { treks, loading: treksLoading } = useTreks()
+  const { treks, loading: treksLoading, getTreksForCategory } = useTreks()
   const { categories, loading: categoriesLoading, fetchActiveCategories, fetchAllCategories } = useCategories()
   const [currentPage, setCurrentPage] = useState<Page>('home')
   const [selectedTrek, setSelectedTrek] = useState<Trek | null>(null)
@@ -74,14 +74,6 @@ function App() {
   const handleBackFromCategories = () => {
     setCurrentPage('admin')
   }
-
-  // Get treks for a specific category (limited to 3 for home page)
-  const getTreksForCategory = React.useCallback((categoryId: string, limit?: number) => {
-    // For now, we'll show all treks since we don't have category relationships loaded
-    // In a real implementation, you'd filter by trek-category relationships
-    const categoryTreks = treks
-    return limit ? categoryTreks.slice(0, limit) : categoryTreks
-  }, [treks])
 
   if (authLoading) {
     return <LoadingSpinner />

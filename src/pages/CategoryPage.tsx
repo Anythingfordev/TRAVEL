@@ -17,18 +17,21 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
   onNavigateBack, 
   onViewTrekDetails 
 }) => {
-  const { treks, loading: treksLoading, fetchTreksByCategory } = useTreks()
+  const { loading: treksLoading, fetchTreksByCategory, getTreksForCategory } = useTreks()
   const { categories } = useCategories()
   const [category, setCategory] = useState<Category | null>(null)
+  const [categoryTreks, setCategoryTreks] = useState<Trek[]>([])
 
   useEffect(() => {
     const foundCategory = categories.find(cat => cat.id === categoryId)
     setCategory(foundCategory || null)
     
-    if (categoryId) {
-      fetchTreksByCategory(categoryId)
+    if (categoryId && fetchTreksByCategory) {
+      fetchTreksByCategory(categoryId).then(treks => {
+        setCategoryTreks(treks)
+      })
     }
-  }, [categoryId, categories, fetchTreksByCategory])
+  }, [categoryId, categories])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -161,7 +164,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               <div className="inline-flex items-center space-x-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full">
                 <MapPin className="h-4 w-4" />
                 <span className="font-medium">
-                  {treksLoading ? 'Loading...' : `${treks.length} trek${treks.length !== 1 ? 's' : ''} available`}
+                  {treksLoading ? 'Loading...' : `${categoryTreks.length} trek${categoryTreks.length !== 1 ? 's' : ''} available`}
                 </span>
               </div>
             </motion.div>
@@ -176,7 +179,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
               <p className="text-slate-600">Loading treks...</p>
             </motion.div>
-          ) : treks.length === 0 ? (
+          ) : categoryTreks.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -213,7 +216,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, staggerChildren: 0.1 }}
             >
-              {treks.map((trek, index) => (
+              {categoryTreks.map((trek, index) => (
                 <TrekCard 
                   key={trek.id} 
                   trek={trek} 

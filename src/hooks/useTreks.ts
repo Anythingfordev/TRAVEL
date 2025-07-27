@@ -6,6 +6,7 @@ export const useTreks = () => {
   const [treks, setTreks] = useState<Trek[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [treksByCategory, setTreksByCategory] = useState<Record<string, Trek[]>>({})
 
   const fetchTreks = async () => {
     try {
@@ -32,6 +33,40 @@ export const useTreks = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchTreksByCategory = async (categoryId: string) => {
+    try {
+      if (!supabase) {
+        setError('Supabase client is not initialized. Cannot fetch treks.')
+        return []
+      }
+
+      const { data, error } = await supabase
+        .from('treks')
+        .select(`
+          *,
+          trek_categories!inner(category_id)
+        `)
+        .eq('trek_categories.category_id', categoryId)
+        .order('start_date', { ascending: true })
+
+      if (error) {
+        throw error
+      }
+      
+      const categoryTreks = data || []
+      setTreksByCategory(prev => ({ ...prev, [categoryId]: categoryTreks }))
+      return categoryTreks
+    } catch (err) {
+      console.error('Error fetching treks by category:', err)
+      return []
+    }
+  }
+
+  const getTreksForCategory = (categoryId: string, limit?: number) => {
+    const categoryTreks = treksByCategory[categoryId] || []
+    return limit ? categoryTreks.slice(0, limit) : categoryTreks
   }
 
   const addTrek = async (trek: Omit<Trek, 'id' | 'created_at'>, categoryIds?: string[]) => {
@@ -74,6 +109,17 @@ export const useTreks = () => {
       }
       
       setTreks((prev: Trek[]) => [...prev, data])
+      
+      // Update category-specific trek lists if categories were assigned
+      if (categoryIds && categoryIds.length > 0) {
+        categoryIds.forEach(categoryId => {
+          setTreksByCategory(prev => ({
+            ...prev,
+            [categoryId]: [...(prev[categoryId] || []), data]
+          }))
+        })
+      }
+      
       return { success: true, data }
     } catch (err) {
       console.error('Error adding trek:', err)
@@ -138,6 +184,15 @@ export const useTreks = () => {
       
       console.log('Update successful:', data)
       setTreks((prev: Trek[]) => prev.map((trek: Trek) => trek.id === id ? data : trek))
+      
+      // Update category-specific trek lists
+      Object.keys(treksByCategory).forEach(categoryId => {
+        setTreksByCategory(prev => ({
+          ...prev,
+          [categoryId]: prev[categoryId]?.map(trek => trek.id === id ? data : trek) || []
+        }))
+      })
+      
       return { success: true, data }
     } catch (err) {
       console.error('Error updating trek:', err)
@@ -158,6 +213,15 @@ export const useTreks = () => {
 
       if (error) throw error
       setTreks((prev: Trek[]) => prev.filter((trek: Trek) => trek.id !== id))
+      
+      // Remove from category-specific trek lists
+      Object.keys(treksByCategory).forEach(categoryId => {
+        setTreksByCategory(prev => ({
+          ...prev,
+          [categoryId]: prev[categoryId]?.filter(trek => trek.id !== id) || []
+        }))
+      })
+      
       return { success: true }
     } catch (err) {
       console.error('Error deleting trek:', err)
@@ -165,49 +229,53 @@ export const useTreks = () => {
     }
   }
 
-  const fetchTreksByCategory = async (categoryId: string) => {
+  // Load category-specific treks on component mount
+  const loadCategoryTreks = async () => {
     try {
-      if (!supabase) {
-        setError('Supabase client is not initialized. Cannot fetch treks.')
-        setLoading(false)
-        return
-      }
-
-      setLoading(true)
-      setError(null)
-      const { data, error } = await supabase
-        .from('treks')
+      if (!supabase) return
+      
+      // Get all categories and their associated treks
+      const { data: categoryTreks, error } = await supabase
+        .from('trek_categories')
         .select(`
-          *,
-          trek_categories!inner(category_id)
+          category_id,
+          treks (*)
         `)
-        .eq('trek_categories.category_id', categoryId)
-        .order('start_date', { ascending: true })
-
-      if (error) {
-        throw error
-      }
-      setTreks(data || [])
+      
+      if (error) throw error
+      
+      // Group treks by category
+      const treksByCategory: Record<string, Trek[]> = {}
+      categoryTreks?.forEach(item => {
+        if (!treksByCategory[item.category_id]) {
+          treksByCategory[item.category_id] = []
+        }
+        if (item.treks) {
+          treksByCategory[item.category_id].push(item.treks as Trek)
+        }
+      })
+      
+      setTreksByCategory(treksByCategory)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      console.error('Error fetching treks by category:', err)
-    } finally {
-      setLoading(false)
+      console.error('Error loading category treks:', err)
     }
   }
 
   useEffect(() => {
     fetchTreks()
+    loadCategoryTreks()
   }, [])
 
   return {
     treks,
+    treksByCategory,
     loading,
     error,
     addTrek,
     updateTrek,
     deleteTrek,
+    getTreksForCategory,
+    fetchTreksByCategory,
     refetch: fetchTreks,
-    fetchTreksByCategory
   }
 }
