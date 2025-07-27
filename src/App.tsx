@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Tag, MapPin, Calendar, Clock, Users } from 'lucide-react'
-import { useTreks } from '../hooks/useTreks'
-import { useCategories } from '../hooks/useCategories'
-import { TrekCard } from '../components/TrekCard'
-import { Category, Trek } from '../types'
+import { useTreks } from './hooks/useTreks'
+import { useCategories } from './hooks/useCategories'
+import { TrekCard } from './components/TrekCard'
+import { Category, Trek } from './types'
 
 interface CategoryPageProps {
   categoryId: string
