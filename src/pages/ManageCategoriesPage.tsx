@@ -28,13 +28,17 @@ interface ManageCategoriesPageProps {
 export const ManageCategoriesPage: React.FC<ManageCategoriesPageProps> = ({ onNavigateBack }) => {
   const { user } = useAuth()
   const { categories, addCategory, updateCategory, deleteCategory, toggleCategoryStatus } = useCategories()
-  const { treks } = useTreks()
+  const { treks, treksByCategory } = useTreks()
   const [showForm, setShowForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [categoryTreks, setCategoryTreks] = useState<Record<string, Trek[]>>({})
 
+  // Get trek count for a category from treksByCategory
+  const getCategoryTrekCount = (categoryId: string) => {
+    return treksByCategory[categoryId]?.length || 0
+  }
   // Fetch treks for a specific category
   const fetchCategoryTreks = async (categoryId: string) => {
     if (!supabase) return
@@ -72,10 +76,6 @@ export const ManageCategoriesPage: React.FC<ManageCategoriesPageProps> = ({ onNa
     setExpandedCategories(newExpanded)
   }
 
-  // Get trek count for a category
-  const getCategoryTrekCount = (categoryId: string) => {
-    return categoryTreks[categoryId]?.length || 0
-  }
   const handleSubmit = async (data: Omit<Category, 'id' | 'created_at' | 'created_by'>) => {
     setIsLoading(true)
     try {
@@ -336,7 +336,7 @@ export const ManageCategoriesPage: React.FC<ManageCategoriesPageProps> = ({ onNa
                             {category.is_active ? 'Active' : 'Inactive'}
                           </div>
                           <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                            {getCategoryTrekCount(category.id)} treks
+                            {getCategoryTrekCount(category.id)}
                           </div>
                         </div>
                         <p className="text-slate-600 mb-2 ml-8">{category.description}</p>
