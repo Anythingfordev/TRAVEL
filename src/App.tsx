@@ -52,7 +52,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
 
   if (!category) {
     return (
-      {categoryTreks.length >= 3 && (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 flex items-center justify-center">
         <div className="text-center">
           <Tag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-600 mb-2">Category not found</h2>
@@ -95,46 +95,6 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               <Tag className="h-6 w-6 text-emerald-600" />
               <span className="text-lg font-bold text-slate-800">TrekZone</span>
             </div>
-            
-            {/* Show inactive categories for admin users */}
-            {user && isAdminUser && categories.filter(category => !category.is_active).length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="mt-16 p-6 bg-amber-50 border border-amber-200 rounded-xl"
-              >
-                <h3 className="text-xl font-bold text-amber-800 mb-4 flex items-center">
-                  <Tag className="h-5 w-5 mr-2" />
-                  Inactive Categories (Admin Only)
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categories.filter(category => !category.is_active).map((category) => (
-                    <div
-                      key={category.id}
-                      className="bg-white p-4 rounded-lg border border-amber-200 opacity-75"
-                    >
-                      <h4 className="font-semibold text-slate-800 mb-2">{category.title}</h4>
-                      <p className="text-sm text-slate-600 mb-3">{category.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
-                          Inactive
-                        </span>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleViewCategory(category.id)}
-                          className="text-xs px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded transition-colors"
-                        >
-                          View
-                        </motion.button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
           </div>
         </div>
       </motion.div>
@@ -203,7 +163,6 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
           ) : treks.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-        {categories.filter(category => category.is_active).length > 0 && (
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="text-center py-16"
@@ -246,8 +205,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                   onViewDetails={() => onViewTrekDetails(trek)}
                 />
               ))}
-            <span>View All Treks in {category.title}</span>
-            <ArrowLeft className="h-4 w-4 rotate-180" />
+            </motion.div>
           )}
         </motion.section>
       </div>
