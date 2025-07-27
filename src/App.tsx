@@ -13,7 +13,7 @@ import { LoadingSpinner } from './components/LoadingSpinner'
 import { useAuth } from './hooks/useAuth'
 import { useTreks } from './hooks/useTreks'
 import { useCategories } from './hooks/useCategories'
-import { Trek } from './types'
+import { Trek, Category } from './types'
 
 // Floating particles animation component
 const FloatingParticles: React.FC = () => {
@@ -164,7 +164,50 @@ function App() {
       
       <Hero />
       
-      <main className="container mx-auto px-4 py-16 relative z-10">
+      <main className="container mx-auto px-4 py-16 relative z-10" id="treks">
+        {/* Categories Section */}
+        {categories.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-16"
+          >
+            <div className="text-center mb-12">
+              <motion.h2
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="text-4xl font-bold text-slate-800 mb-4"
+              >
+                Explore by Category
+              </motion.h2>
+              <motion.p
+                initial={{ y: 30, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="text-xl text-slate-600 max-w-2xl mx-auto"
+              >
+                Discover amazing adventures organized by your interests
+              </motion.p>
+            </div>
+            
+            <div className="space-y-12">
+              {categories.filter(category => category.is_active).map((category, index) => (
+                <CategorySection
+                  key={category.id}
+                  category={category}
+                  index={index}
+                  onViewCategory={handleViewCategory}
+                  onViewTrekDetails={handleViewTrekDetails}
+                />
+              ))}
+            </div>
+          </motion.section>
+        )}
 
         {!user && (
           <motion.section
@@ -241,11 +284,19 @@ function App() {
 }
 
 // Category Section Component
-const CategorySection: React.FC<{
-  category: any
+interface CategorySectionProps {
+  category: Category
+  index: number
   onViewCategory: (categoryId: string) => void
   onViewTrekDetails: (trek: Trek) => void
-}> = ({ category, onViewCategory, onViewTrekDetails }) => {
+}
+
+const CategorySection: React.FC<CategorySectionProps> = ({ 
+  category, 
+  index,
+  onViewCategory, 
+  onViewTrekDetails 
+}) => {
   const [categoryTreks, setCategoryTreks] = useState<Trek[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -378,8 +429,9 @@ const CategorySection: React.FC<{
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
       className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100"
     >
       <div className="flex items-center justify-between mb-8">
@@ -414,6 +466,19 @@ const CategorySection: React.FC<{
           />
         ))}
       </div>
+      
+      {categoryTreks.length > 3 && (
+        <div className="text-center mt-8">
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onViewCategory(category.id)}
+            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-all duration-300 hover:shadow-md"
+          >
+            View {categoryTreks.length - 3} More Treks
+          </motion.button>
+        </div>
+      )}
     </motion.div>
   )
 }

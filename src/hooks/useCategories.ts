@@ -37,10 +37,6 @@ export const useCategories = () => {
 
   const fetchActiveCategories = async () => {
     try {
-      // Debug logging
-      console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL)
-      console.log('Supabase client exists:', !!supabase)
-      
       if (!supabase) {
         setError('Database connection not configured. Please set up Supabase credentials.')
         setLoading(false)
@@ -50,7 +46,6 @@ export const useCategories = () => {
       setLoading(true)
       setError(null)
       
-      console.log('Attempting to fetch active categories...')
       const { data, error } = await supabase
         .from('categories')
         .select('*')
@@ -58,13 +53,10 @@ export const useCategories = () => {
         .order('title', { ascending: true })
 
       if (error) {
-        console.error('Supabase query error:', error)
         throw error
       }
-      console.log('Successfully fetched categories:', data)
       setCategories(data || [])
     } catch (err) {
-      console.error('Full error object:', err)
       const errorMessage = err instanceof Error ? err.message : 'An error occurred'
       setError(`Failed to load categories: ${errorMessage}`)
       console.error('Error fetching active categories:', err)
