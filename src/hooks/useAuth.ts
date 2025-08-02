@@ -14,16 +14,32 @@ export const useAuth = () => {
       return
     }
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Get initial session with error handling
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.warn('Session recovery failed:', error.message)
+        // Clear any corrupted session data
+        supabase.auth.signOut()
+      }
       setUser(session?.user ?? null)
       setIsAdminUser(isAdmin(session?.user?.email))
+      setLoading(false)
+    }).catch((error) => {
+      console.warn('Failed to get session:', error.message)
+      // Clear any corrupted session data
+      supabase.auth.signOut()
+      setUser(null)
+      setIsAdminUser(false)
       setLoading(false)
     })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (event === 'TOKEN_REFRESHED' && !session) {
+          console.warn('Token refresh failed, signing out')
+          supabase.auth.signOut()
+        }
         setUser(session?.user ?? null)
         setIsAdminUser(isAdmin(session?.user?.email))
         setLoading(false)

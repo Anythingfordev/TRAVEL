@@ -11,7 +11,9 @@ export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         autoRefreshToken: true,
-        persistSession: true
+        persistSession: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce'
       }
     })
   : null
